@@ -35,6 +35,7 @@ export default defineNuxtConfig({
     linkCacheTtl: 60,
     redirectWithQuery: false,
     homeURL: '',
+    cfPrivateKey: '',
     cfAccountId: '',
     cfApiToken: '',
     dataset: 'sink',
@@ -46,6 +47,7 @@ export default defineNuxtConfig({
     public: {
       previewMode: '',
       slugDefaultLength: '6',
+      cfSiteKey: '',
     },
   },
 

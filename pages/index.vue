@@ -58,7 +58,7 @@ async function onSubmit() {
       >
       <div id="captcha-container" class="my-4">
         <cf-turnstile
-          sitekey="your-cloudflare-site-key"
+          :sitekey="useRuntimeConfig().public.cfSiteKey"
           @success="onCaptchaSuccess"
         />
       </div>
