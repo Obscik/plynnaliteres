@@ -64,21 +64,17 @@ async function onSubmit() {
         placeholder="Enter your URL"
         class="w-full max-w-md p-2 border rounded"
       >
-      <div
-        id="captcha-container"
-        class="my-4 p-4 border rounded bg-gray-100 shadow-md flex items-center justify-center"
-        style="min-height: 100px; min-width: 300px;"
-      >
-        <component
-          :is="TurnstileComponent ? 'cf-turnstile' : 'div'"
-          v-if="TurnstileComponent"
-          :public-site-key="publicSiteKey"
-          @success="onCaptchaSuccess"
-        />
-        <div v-else class="text-red-500">
-          CAPTCHA component failed to load.
-        </div>
+
+      <component
+        :is="TurnstileComponent ? 'cf-turnstile' : 'div'"
+        v-if="TurnstileComponent"
+        :site-key="publicSiteKey"
+        @success="onCaptchaSuccess"
+      />
+      <div v-else class="text-red-500">
+        CAPTCHA component failed to load.
       </div>
+
       <button class="w-full max-w-md p-2 bg-blue-500 text-white rounded" @click="onSubmit">
         Shorten Link
       </button>
