@@ -139,7 +139,7 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
       vue-tsc:
-        specifier: ^2.1.6
+        specifier: 2.1.6
         version: 2.1.6(typescript@5.8.3)
       wrangler:
         specifier: ^3.99.0
