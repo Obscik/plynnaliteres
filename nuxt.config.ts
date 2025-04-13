@@ -13,6 +13,18 @@ export default defineNuxtConfig({
   ],
   devtools: { enabled: true },
 
+  app: {
+    head: {
+      script: [
+        {
+          src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+          async: true,
+          defer: true,
+        },
+      ],
+    },
+  },
+
   colorMode: {
     classSuffix: '',
   },
