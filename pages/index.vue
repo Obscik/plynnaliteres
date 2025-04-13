@@ -13,12 +13,7 @@ catch (error) {
 const url = ref('')
 const captchaToken = ref(null)
 const bearerToken = ref('')
-const pubicsiteKey = useRuntimeConfig().public.cfSiteKey || ''
-console.error(`Missing or invalid sitekey for Cloudflare Turnstile.${pubicsiteKey}`)
-if (!pubicsiteKey) {
-  console.error(`Missing or invalid sitekey for Cloudflare Turnstile.${pubicsiteKey}`)
-  toast.error('Missing or invalid sitekey for Cloudflare Turnstile.')
-}
+const pubicsiteKey = String(useRuntimeConfig().public.cfSiteKey || '')
 
 function onCaptchaSuccess(token) {
   captchaToken.value = token
