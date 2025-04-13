@@ -1,9 +1,70 @@
 <script setup>
 import ShortenLink from '@/components/home/ShortenLink.vue'
+import { ref } from 'vue'
+import { toast } from 'vue-sonner'
+
+const url = ref('')
+const captchaToken = ref(null)
+
+function onCaptchaSuccess(token) {
+  captchaToken.value = token
+}
+
+async function onSubmit() {
+  if (!url.value) {
+    toast.error('Please enter a valid URL.')
+    return
+  }
+
+  if (!captchaToken.value) {
+    toast.error('Please complete the CAPTCHA.')
+    return
+  }
+
+  try {
+    const response = await $fetch('/api/link/create', {
+      method: 'POST',
+      body: {
+        url: url.value,
+        captchaToken: captchaToken.value,
+      },
+    })
+    toast.success('Link shortened successfully!', {
+      description: `Shortened URL: ${response.shortLink}`,
+    })
+    url.value = ''
+    captchaToken.value = null
+  }
+  catch (error) {
+    toast.error('Failed to shorten the link.', {
+      description: error.message,
+    })
+  }
+}
 </script>
 
 <template>
   <main class="flex flex-col items-center justify-center min-h-screen">
     <ShortenLink />
+    <div class="flex flex-col items-center space-y-4">
+      <h1 class="text-2xl font-bold">
+        Shorten Your Link
+      </h1>
+      <input
+        v-model="url"
+        type="url"
+        placeholder="Enter your URL"
+        class="w-full max-w-md p-2 border rounded"
+      >
+      <div id="captcha-container" class="my-4">
+        <cf-turnstile
+          sitekey="your-cloudflare-site-key"
+          @success="onCaptchaSuccess"
+        />
+      </div>
+      <button class="w-full max-w-md p-2 bg-blue-500 text-white rounded" @click="onSubmit">
+        Shorten Link
+      </button>
+    </div>
   </main>
 </template>
