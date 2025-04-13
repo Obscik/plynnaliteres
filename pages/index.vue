@@ -2,6 +2,14 @@
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 
+let TurnstileComponent
+try {
+  TurnstileComponent = await import('cf-turnstile')
+}
+catch (error) {
+  console.error('Failed to load cf-turnstile module:', error)
+}
+
 const url = ref('')
 const captchaToken = ref(null)
 const bearerToken = ref('')
@@ -55,10 +63,15 @@ async function onSubmit() {
         class="w-full max-w-md p-2 border rounded"
       >
       <div id="captcha-container" class="my-4">
-        <cf-turnstile
+        <component
+          :is="TurnstileComponent ? 'cf-turnstile' : 'div'"
+          v-if="TurnstileComponent"
           :sitekey="useRuntimeConfig().public.cfSiteKey"
           @success="onCaptchaSuccess"
         />
+        <div v-else class="text-red-500">
+          CAPTCHA component failed to load.
+        </div>
       </div>
       <button class="w-full max-w-md p-2 bg-blue-500 text-white rounded" @click="onSubmit">
         Shorten Link

@@ -1,24 +1,37 @@
 import { LinkSchema } from '@/schemas/link'
+import { z } from 'zod'
 
 export default eventHandler(async (event) => {
   const { captchaToken, ...linkData } = await readValidatedBody(event, LinkSchema.extend({
-    captchaToken: z.string().nonempty(),
+    captchaToken: z.string().optional(), // Make CAPTCHA token optional
   }).parse)
 
-  // Validate CAPTCHA token with Cloudflare
-  const { cfCaptchaSecret } = useRuntimeConfig(event)
-  const captchaResponse = await $fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    body: {
-      secret: cfCaptchaSecret,
-      response: captchaToken,
-    },
-  })
+  const { cfCaptchaSecret, siteToken } = useRuntimeConfig(event)
+  const authorizationHeader = getHeader(event, 'Authorization')?.replace('Bearer ', '')
 
-  if (!captchaResponse.success) {
+  let isAuthenticated = false
+
+  // Validate CAPTCHA token if provided
+  if (captchaToken) {
+    const captchaResponse = await $fetch<{ success: boolean }>('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: {
+        secret: cfCaptchaSecret,
+        response: captchaToken,
+      },
+    })
+    isAuthenticated = captchaResponse.success
+  }
+
+  // Validate Bearer token if CAPTCHA is not provided or invalid
+  if (!isAuthenticated && authorizationHeader === siteToken) {
+    isAuthenticated = true
+  }
+
+  if (!isAuthenticated) {
     throw createError({
-      status: 403,
-      statusText: 'CAPTCHA validation failed.',
+      status: 401,
+      statusText: 'Unauthorized: Invalid CAPTCHA or Bearer token.',
     })
   }
 

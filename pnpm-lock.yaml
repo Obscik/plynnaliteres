@@ -26,6 +26,9 @@ importers:
       '@vueuse/core':
         specifier: ^12.2.0
         version: 12.2.0(typescript@5.7.2)
+      cf-turnstile:
+        specifier: ^1.0.8
+        version: 1.0.8(encoding@0.1.13)
       fuse.js:
         specifier: ^7.0.0
         version: 7.0.0
@@ -2919,6 +2922,9 @@ packages:
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
+
+  cf-turnstile@1.0.8:
+    resolution: {integrity: sha512-GwcnyJDzZki+3OHlF7Jd+kCkJezBiGdtQiRdX9G8Yo68/CfLmix1KUUdxYO0SUKIJjqM0f1ZFBu/nLByTNLS5Q==}
 
   chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
@@ -9939,6 +9945,12 @@ snapshots:
       - supports-color
 
   ccount@2.0.1: {}
+
+  cf-turnstile@1.0.8(encoding@0.1.13):
+    dependencies:
+      node-fetch: 2.7.0(encoding@0.1.13)
+    transitivePeerDependencies:
+      - encoding
 
   chalk@2.4.2:
     dependencies:
