@@ -1,5 +1,4 @@
 <script setup>
-import ShortenLink from '@/components/home/ShortenLink.vue'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 
@@ -45,11 +44,7 @@ async function onSubmit() {
 
 <template>
   <main class="flex flex-col items-center justify-center min-h-screen">
-    <ShortenLink />
     <div class="flex flex-col items-center space-y-4">
-      <h1 class="text-2xl font-bold">
-        Shorten Your Link
-      </h1>
       <input
         v-model="url"
         type="url"
