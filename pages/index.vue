@@ -13,6 +13,12 @@ catch (error) {
 const url = ref('')
 const captchaToken = ref(null)
 const bearerToken = ref('')
+const pubicsiteKey = useRuntimeConfig().public.cfSiteKey || ''
+
+if (!pubicsiteKey) {
+  console.error(`Missing or invalid sitekey for Cloudflare Turnstile.${pubicsiteKey}`)
+  toast.error('Missing or invalid sitekey for Cloudflare Turnstile.')
+}
 
 function onCaptchaSuccess(token) {
   captchaToken.value = token
@@ -25,7 +31,7 @@ async function onSubmit() {
   }
 
   if (!captchaToken.value && !bearerToken.value) {
-    toast.error('Please complete the CAPTCHA or provide a Bearer token.')
+    toast.error('Please complete the CAPTCHA.')
     return
   }
 
@@ -65,8 +71,8 @@ async function onSubmit() {
       <div id="captcha-container" class="my-4">
         <component
           :is="TurnstileComponent ? 'cf-turnstile' : 'div'"
-          v-if="TurnstileComponent"
-          :sitekey="useRuntimeConfig().public.cfSiteKey"
+          v-if="TurnstileComponent && pubicsiteKey"
+          :pubicsite-key="pubicsiteKey"
           @success="onCaptchaSuccess"
         />
         <div v-else class="text-red-500">
