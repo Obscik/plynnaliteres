@@ -4,6 +4,7 @@ import { toast } from 'vue-sonner'
 
 const url = ref('')
 const captchaToken = ref(null)
+const bearerToken = ref('')
 
 function onCaptchaSuccess(token) {
   captchaToken.value = token
@@ -15,8 +16,8 @@ async function onSubmit() {
     return
   }
 
-  if (!captchaToken.value) {
-    toast.error('Please complete the CAPTCHA.')
+  if (!captchaToken.value && !bearerToken.value) {
+    toast.error('Please complete the CAPTCHA or provide a Bearer token.')
     return
   }
 
@@ -27,12 +28,14 @@ async function onSubmit() {
         url: url.value,
         captchaToken: captchaToken.value,
       },
+      headers: bearerToken.value ? { Authorization: `Bearer ${bearerToken.value}` } : {},
     })
     toast.success('Link shortened successfully!', {
       description: `Shortened URL: ${response.shortLink}`,
     })
     url.value = ''
     captchaToken.value = null
+    bearerToken.value = ''
   }
   catch (error) {
     toast.error('Failed to shorten the link.', {

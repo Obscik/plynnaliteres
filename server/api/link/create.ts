@@ -2,18 +2,30 @@ import { nanoid } from '@/schemas/link'
 
 export default eventHandler(async (event) => {
   const { url, captchaToken } = await readBody(event)
-  const { cfPrivateKey } = useRuntimeConfig()
+  const { cfPrivateKey, siteToken } = useRuntimeConfig()
+  const authorizationHeader = getHeader(event, 'Authorization')?.replace('Bearer ', '')
 
-  const captchaResponse = await $fetch<{ success: boolean }>('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    body: {
-      secret: cfPrivateKey,
-      response: captchaToken,
-    },
-  })
+  let isAuthenticated = false
 
-  if (!captchaResponse.success) {
-    throw createError({ statusCode: 400, message: 'CAPTCHA verification failed.' })
+  // Check CAPTCHA token
+  if (captchaToken) {
+    const captchaResponse = await $fetch<{ success: boolean }>('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: {
+        secret: cfPrivateKey,
+        response: captchaToken,
+      },
+    })
+    isAuthenticated = captchaResponse.success
+  }
+
+  // Check Bearer token
+  if (!isAuthenticated && authorizationHeader === siteToken) {
+    isAuthenticated = true
+  }
+
+  if (!isAuthenticated) {
+    throw createError({ statusCode: 401, message: 'Unauthorized: Invalid CAPTCHA or Bearer token.' })
   }
 
   const slug = nanoid()
