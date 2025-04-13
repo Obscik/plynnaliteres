@@ -13,7 +13,7 @@ catch (error) {
 const url = ref('')
 const captchaToken = ref(null)
 const bearerToken = ref('')
-const pubicsiteKey = String(useRuntimeConfig().public.cfSiteKey || '')
+const publicSiteKey = String(useRuntimeConfig().public.cfSiteKey || '')
 
 function onCaptchaSuccess(token) {
   captchaToken.value = token
@@ -66,8 +66,8 @@ async function onSubmit() {
       <div id="captcha-container" class="my-4">
         <component
           :is="TurnstileComponent ? 'cf-turnstile' : 'div'"
-          v-if="TurnstileComponent && pubicsiteKey"
-          :pubicsite-key="pubicsiteKey"
+          v-if="TurnstileComponent && publicSiteKey"
+          :sitekey="publicSiteKey"
           @success="onCaptchaSuccess"
         />
         <div v-else class="text-red-500">
