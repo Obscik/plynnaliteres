@@ -25,7 +25,7 @@ async function onSubmit() {
     return
   }
 
-  if (!captchaToken.value && !bearerToken.value) {
+  if (!captchaToken.value) {
     toast.error('Please complete the CAPTCHA.')
     return
   }
