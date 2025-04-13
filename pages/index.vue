@@ -13,7 +13,7 @@ catch (error) {
 const url = ref('')
 const captchaToken = ref(null)
 const bearerToken = ref('')
-const publicSiteKey = String(useRuntimeConfig().public.cfSiteKey || '')
+const publicSiteKey = String(useRuntimeConfig().public.cfSiteKey)
 
 function onCaptchaSuccess(token) {
   captchaToken.value = token
@@ -26,7 +26,8 @@ async function onSubmit() {
   }
 
   if (!captchaToken.value) {
-    toast.error('Please complete the CAPTCHA.')
+    toast.error('Please complete the CAPTCHA challenge.')
+    console.error(captchaToken.value)
     return
   }
 
@@ -63,11 +64,15 @@ async function onSubmit() {
         placeholder="Enter your URL"
         class="w-full max-w-md p-2 border rounded"
       >
-      <div id="captcha-container" class="my-4">
+      <div
+        id="captcha-container"
+        class="my-4 p-4 border rounded bg-gray-100 shadow-md flex items-center justify-center"
+        style="min-height: 100px; min-width: 300px;"
+      >
         <component
           :is="TurnstileComponent ? 'cf-turnstile' : 'div'"
-          v-if="TurnstileComponent && publicSiteKey"
-          :sitekey="publicSiteKey"
+          v-if="TurnstileComponent"
+          :public-site-key="publicSiteKey"
           @success="onCaptchaSuccess"
         />
         <div v-else class="text-red-500">

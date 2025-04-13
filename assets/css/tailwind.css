@@ -89,3 +89,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+.nuxt-loading-indicator {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  pointer-events: none;
+  width: auto;
+  height: 3px;
+  opacity: 0;
+  background: #000;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.1s, height 0.4s, opacity 0.4s;
+  z-index: 999999;
+}
