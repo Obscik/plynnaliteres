@@ -30,6 +30,7 @@ async function onSubmit() {
 
   if (!captchaToken.value) {
     toast.error('Please complete the CAPTCHA challenge.')
+    console.error('token: ', captchaToken.value)
     return
   }
 
