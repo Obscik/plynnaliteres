@@ -50,9 +50,16 @@ async function onSubmit(event) {
       method: 'POST',
       body,
     })
+
+    console.log('Link creation response:', response) // Debugging log
+
     toast.success('Link shortened successfully!', {
       description: `Shortened URL: ${response.shortLink}`,
     })
+
+    // Display the full link details
+    console.log('Link details:', response.link)
+
     url.value = ''
     slug.value = ''
     expiryDate.value = ''

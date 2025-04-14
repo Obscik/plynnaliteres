@@ -1,4 +1,5 @@
 import { LinkSchema } from '@/schemas/link'
+import { nanoid } from 'nanoid'
 import { z } from 'zod'
 
 export default eventHandler(async (event) => {
@@ -28,11 +29,8 @@ export default eventHandler(async (event) => {
       console.error('CAPTCHA validation error:', error) // Debugging log
     }
   }
-  else {
-    console.warn('No CAPTCHA token provided.') // Debugging log
-  }
 
-  // Validate Bearer token if CAPTCHA is not provided or invalid
+  // Validate Bearer token only if CAPTCHA is invalid or not provided
   if (!isAuthenticated && authorizationHeader === siteToken) {
     isAuthenticated = true
     console.log('Bearer token validated successfully.') // Debugging log
@@ -54,6 +52,13 @@ export default eventHandler(async (event) => {
   if (!caseSensitive) {
     linkData.slug = linkData.slug.toLowerCase()
   }
+
+  // Generate unique ID and timestamps
+  const id = nanoid()
+  const timestamp = Math.floor(Date.now() / 1000)
+  linkData.id = id
+  linkData.createdAt = timestamp
+  linkData.updatedAt = timestamp
 
   const { cloudflare } = event.context
   const { KV } = cloudflare.env
