@@ -20,6 +20,11 @@ function onCaptchaSuccess(token) {
   captchaToken.value = token
 }
 
+// Add a fallback for debugging if the event is not triggered
+function onCaptchaError(error) {
+  console.error('CAPTCHA error:', error) // Debugging log
+}
+
 async function onSubmit() {
   console.log('Submitting with CAPTCHA token:', captchaToken.value) // Debugging log
 
@@ -74,6 +79,7 @@ async function onSubmit() {
         v-if="TurnstileComponent"
         :site-key="publicSiteKey"
         @success="onCaptchaSuccess"
+        @error="onCaptchaError"
       />
       <div v-else class="text-red-500">
         CAPTCHA component failed to load.
