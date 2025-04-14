@@ -13,14 +13,20 @@ export default eventHandler(async (event) => {
 
   // Validate CAPTCHA token if provided
   if (captchaToken) {
-    const captchaResponse = await $fetch<{ success: boolean }>('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      body: {
-        secret: cfCaptchaSecret,
-        response: captchaToken,
-      },
-    })
-    isAuthenticated = captchaResponse.success
+    try {
+      const captchaResponse = await $fetch<{ success: boolean }>('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        body: {
+          secret: cfCaptchaSecret,
+          response: captchaToken,
+        },
+      })
+      isAuthenticated = captchaResponse.success
+      console.log('CAPTCHA validation result:', captchaResponse) // Debugging log
+    }
+    catch (error) {
+      console.error('CAPTCHA validation error:', error) // Debugging log
+    }
   }
 
   // Validate Bearer token if CAPTCHA is not provided or invalid
@@ -29,6 +35,7 @@ export default eventHandler(async (event) => {
   }
 
   if (!isAuthenticated) {
+    console.error('Authentication failed. CAPTCHA or Bearer token invalid.') // Debugging log
     throw createError({
       status: 401,
       statusText: 'Unauthorized: Invalid CAPTCHA or Bearer token.',

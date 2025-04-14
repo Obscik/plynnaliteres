@@ -34,7 +34,7 @@ async function onSubmit(event) {
 
     const body = {
       url: url.value,
-      captchaToken,
+      captchaToken, // Ensure CAPTCHA token is included
     }
 
     // Include optional fields if provided
