@@ -56,7 +56,7 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/': {
-      prerender: true,
+      prerender: false, // Disable prerendering for the root route
     },
     '/dashboard/**': {
       ssr: false,
