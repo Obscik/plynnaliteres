@@ -23,7 +23,12 @@ export default defineNuxtConfig({
         },
       ],
       link: [
-        // Remove the preload tag if the resource is not critical
+        {
+          rel: 'preload',
+          href: 'https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/cmg/1',
+          as: 'script', // Ensure this matches the resource type
+          type: 'text/javascript', // Add type if applicable
+        },
       ],
     },
   },
