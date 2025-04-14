@@ -29,6 +29,7 @@ async function onSubmit(event) {
 
     if (!captchaToken) {
       toast.error('Please complete the CAPTCHA challenge.')
+      console.error('CAPTCHA token is missing.') // Debugging log
       return
     }
 
@@ -42,6 +43,8 @@ async function onSubmit(event) {
       body.slug = slug.value
     if (expiryDate.value)
       body.expiryDate = expiryDate.value
+
+    console.log('Submitting request body:', body) // Debugging log
 
     const response = await $fetch('/api/link/create', {
       method: 'POST',

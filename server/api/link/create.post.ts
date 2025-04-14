@@ -28,10 +28,17 @@ export default eventHandler(async (event) => {
       console.error('CAPTCHA validation error:', error) // Debugging log
     }
   }
+  else {
+    console.warn('No CAPTCHA token provided.') // Debugging log
+  }
 
   // Validate Bearer token if CAPTCHA is not provided or invalid
   if (!isAuthenticated && authorizationHeader === siteToken) {
     isAuthenticated = true
+    console.log('Bearer token validated successfully.') // Debugging log
+  }
+  else if (!isAuthenticated) {
+    console.warn('Invalid or missing Bearer token.') // Debugging log
   }
 
   if (!isAuthenticated) {
