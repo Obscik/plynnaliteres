@@ -1,52 +1,86 @@
-import { nanoid } from '@/schemas/link'
+import { LinkSchema } from '@/schemas/link'
+import { nanoid } from 'nanoid'
+import { z } from 'zod'
 
 export default eventHandler(async (event) => {
-  const { url, captchaToken } = await readBody(event)
-  const { cfPrivateKey, siteToken } = useRuntimeConfig()
+  const { captchaToken, ...linkData } = await readValidatedBody(event, LinkSchema.extend({
+    captchaToken: z.string().optional(), // Make CAPTCHA token optional
+  }).parse)
+
+  const { cfCaptchaSecret, siteToken } = useRuntimeConfig(event)
   const authorizationHeader = getHeader(event, 'Authorization')?.replace('Bearer ', '')
 
   let isAuthenticated = false
 
-  // Check CAPTCHA token
+  // Validate CAPTCHA token if provided
   if (captchaToken) {
-    const captchaResponse = await $fetch<{ success: boolean }>('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      body: {
-        secret: cfPrivateKey,
-        response: captchaToken,
-      },
-    })
-    isAuthenticated = captchaResponse.success
+    try {
+      const captchaResponse = await $fetch<{ success: boolean }>('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        body: {
+          secret: cfCaptchaSecret,
+          response: captchaToken,
+        },
+      })
+      isAuthenticated = captchaResponse.success
+      console.log('CAPTCHA validation result:', captchaResponse) // Debugging log
+    }
+    catch (error) {
+      console.error('CAPTCHA validation error:', error) // Debugging log
+    }
   }
 
-  // Check Bearer token
+  // Validate Bearer token only if CAPTCHA is invalid or not provided
   if (!isAuthenticated && authorizationHeader === siteToken) {
     isAuthenticated = true
+    console.log('Bearer token validated successfully.') // Debugging log
+  }
+  else if (!isAuthenticated) {
+    console.warn('Invalid or missing Bearer token.') // Debugging log
   }
 
   if (!isAuthenticated) {
-    throw createError({ statusCode: 401, message: 'Unauthorized: Invalid CAPTCHA or Bearer token.' })
+    console.error('Authentication failed. CAPTCHA or Bearer token invalid.') // Debugging log
+    throw createError({
+      status: 401,
+      statusText: 'Unauthorized: Invalid CAPTCHA or Bearer token.',
+    })
   }
 
-  const slug = nanoid()
-  const shortLink = `${useRuntimeConfig().public.baseUrl}/${slug}`
+  // Proceed with link creation
+  const { caseSensitive } = useRuntimeConfig(event)
+  if (!caseSensitive) {
+    linkData.slug = linkData.slug.toLowerCase()
+  }
+
+  // Generate unique ID and timestamps
+  const id = nanoid()
+  const timestamp = Math.floor(Date.now() / 1000)
+  linkData.id = id
+  linkData.createdAt = timestamp
+  linkData.updatedAt = timestamp
 
   const { cloudflare } = event.context
   const { KV } = cloudflare.env
+  const existingLink = await KV.get(`link:${linkData.slug}`)
+  if (existingLink) {
+    throw createError({
+      status: 409,
+      statusText: 'Link already exists',
+    })
+  }
 
-  const expiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days expiration
-  await KV.put(`link:${slug}`, JSON.stringify({ url, slug }), {
+  const expiration = getExpiration(event, linkData.expiration)
+  await KV.put(`link:${linkData.slug}`, JSON.stringify(linkData), {
     expiration,
     metadata: {
-      url,
+      expiration,
+      url: linkData.url,
+      comment: linkData.comment,
     },
   })
 
-  return {
-    statusCode: 201,
-    body: {
-      shortLink,
-      slug,
-    },
-  }
+  setResponseStatus(event, 201)
+  const shortLink = `${getRequestProtocol(event)}://${getRequestHost(event)}/${linkData.slug}`
+  return { link: linkData, shortLink }
 })
