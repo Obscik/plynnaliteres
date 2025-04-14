@@ -39,7 +39,7 @@ const { title, github } = useAppConfig()
           <div
             class="flex-col w-full h-auto overflow-hidden rounded-lg bg-background md:overflow-visible md:rounded-none md:relative md:flex md:flex-row"
           >
-            <!-- <a
+            <a
               href="/"
               :title="title"
               class="inline-flex items-center w-auto h-16 px-4 text-xl font-black leading-none text-gray-900 dark:text-gray-100 md:hidden"
@@ -54,7 +54,7 @@ const { title, github } = useAppConfig()
                 >
               </span>
               <span class="mx-2">{{ title }}</span>
-            </a> -->
+            </a>
             <div class="w-auto mx-4" />
             <div
               class="flex flex-col items-start justify-end w-full pt-4 md:items-center md:flex-row md:py-0"
