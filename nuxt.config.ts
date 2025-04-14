@@ -22,6 +22,9 @@ export default defineNuxtConfig({
           defer: true,
         },
       ],
+      link: [
+        // Remove the preload tag if the resource is not critical
+      ],
     },
   },
 
