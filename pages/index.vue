@@ -11,7 +11,8 @@ catch (error) {
 }
 
 const url = ref('')
-const bearerToken = ref('')
+const slug = ref('')
+const expiryDate = ref('')
 const publicSiteKey = String(useRuntimeConfig().public.cfSiteKey)
 
 async function onSubmit(event) {
@@ -31,18 +32,27 @@ async function onSubmit(event) {
       return
     }
 
+    const body = {
+      url: url.value,
+      captchaToken,
+    }
+
+    // Include optional fields if provided
+    if (slug.value)
+      body.slug = slug.value
+    if (expiryDate.value)
+      body.expiryDate = expiryDate.value
+
     const response = await $fetch('/api/link/create', {
       method: 'POST',
-      body: {
-        url: url.value,
-        captchaToken,
-      },
-      headers: bearerToken.value ? { Authorization: `Bearer ${bearerToken.value}` } : {},
+      body,
     })
     toast.success('Link shortened successfully!', {
       description: `Shortened URL: ${response.shortLink}`,
     })
     url.value = ''
+    slug.value = ''
+    expiryDate.value = ''
   }
   catch (error) {
     console.error('Submission error:', error) // Debugging log
@@ -65,6 +75,20 @@ async function onSubmit(event) {
         placeholder="Enter your URL"
         class="w-full max-w-md p-2 border rounded"
         required
+      >
+
+      <input
+        v-model="slug"
+        type="text"
+        placeholder="Custom slug (optional)"
+        class="w-full max-w-md p-2 border rounded"
+      >
+
+      <input
+        v-model="expiryDate"
+        type="date"
+        placeholder="Expiry date (optional)"
+        class="w-full max-w-md p-2 border rounded"
       >
 
       <component
