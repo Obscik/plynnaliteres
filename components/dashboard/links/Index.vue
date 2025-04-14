@@ -9,7 +9,6 @@ let listComplete = false
 let listError = false
 
 const sortBy = ref('az')
-const selectedLinks = ref([])
 
 const displayedLinks = computed(() => {
   const sorted = [...links.value]
@@ -72,62 +71,6 @@ function updateLinkList(link, type) {
     sortBy.value = 'newest'
   }
 }
-
-function toggleSelection(linkId) {
-  if (selectedLinks.value.includes(linkId)) {
-    selectedLinks.value = selectedLinks.value.filter(id => id !== linkId)
-  }
-  else {
-    selectedLinks.value.push(linkId)
-  }
-}
-
-async function deleteSelectedLinks() {
-  if (!selectedLinks.value.length) {
-    toast.error('No links selected for deletion.')
-    return
-  }
-
-  try {
-    await useAPI('/api/link/delete-batch', {
-      method: 'POST',
-      body: {
-        slugs: selectedLinks.value,
-      },
-    })
-    toast.success('Selected links deleted successfully!')
-    selectedLinks.value.forEach((slug) => {
-      const index = links.value.findIndex(link => link.slug === slug)
-      if (index !== -1)
-        links.value.splice(index, 1)
-    })
-    selectedLinks.value = []
-  }
-  catch (error) {
-    console.error('Batch deletion error:', error)
-    toast.error('Failed to delete selected links.')
-  }
-}
-
-async function deleteAllLinks() {
-  if (!links.value.length) {
-    toast.error('No links available to delete.')
-    return
-  }
-
-  try {
-    await useAPI('/api/link/delete-all', {
-      method: 'POST',
-    })
-    toast.success('All links deleted successfully!')
-    links.value = []
-    selectedLinks.value = []
-  }
-  catch (error) {
-    console.error('Delete all error:', error)
-    toast.error('Failed to delete all links.')
-  }
-}
 </script>
 
 <template>
@@ -137,33 +80,17 @@ async function deleteAllLinks() {
         <div class="flex items-center gap-2">
           <DashboardLinksEditor @update:link="updateLinkList" />
           <DashboardLinksSort v-model:sort-by="sortBy" />
-          <Button variant="outline" @click="deleteSelectedLinks">
-            Delete Selected
-          </Button>
-          <Button variant="outline" @click="deleteAllLinks">
-            Delete All
-          </Button>
         </div>
       </DashboardNav>
       <LazyDashboardLinksSearch />
     </div>
     <section class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <div
+      <DashboardLinksLink
         v-for="link in displayedLinks"
         :key="link.id"
-        class="relative"
-      >
-        <input
-          type="checkbox"
-          class="absolute top-2 left-2"
-          :value="link.slug"
-          @change="toggleSelection(link.slug)"
-        >
-        <DashboardLinksLink
-          :link="link"
-          @update:link="updateLinkList"
-        />
-      </div>
+        :link="link"
+        @update:link="updateLinkList"
+      />
     </section>
     <div
       v-if="isLoading"
