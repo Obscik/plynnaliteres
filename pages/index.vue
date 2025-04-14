@@ -11,40 +11,31 @@ catch (error) {
 }
 
 const url = ref('')
-const captchaToken = ref(null)
 const bearerToken = ref('')
 const publicSiteKey = String(useRuntimeConfig().public.cfSiteKey)
 
-function onCaptchaSuccess(token) {
-  console.log('CAPTCHA success token:', token) // Debugging log
-  captchaToken.value = token
-}
-
-// Add a fallback for debugging if the event is not triggered
-function onCaptchaError(error) {
-  console.error('CAPTCHA error:', error) // Debugging log
-}
-
-async function onSubmit() {
-  console.log('Submitting with CAPTCHA token:', captchaToken.value) // Debugging log
+async function onSubmit(event) {
+  event.preventDefault() // Prevent default form submission behavior
 
   if (!url.value) {
     toast.error('Please enter a valid URL.')
     return
   }
 
-  if (!captchaToken.value) {
-    toast.error('Please complete the CAPTCHA challenge.')
-    console.error('token: ', captchaToken.value)
-    return
-  }
-
   try {
+    const formData = new FormData(event.target)
+    const captchaToken = formData.get('cf-turnstile-response') // Get the CAPTCHA token from the hidden input
+
+    if (!captchaToken) {
+      toast.error('Please complete the CAPTCHA challenge.')
+      return
+    }
+
     const response = await $fetch('/api/link/create', {
       method: 'POST',
       body: {
         url: url.value,
-        captchaToken: captchaToken.value,
+        captchaToken,
       },
       headers: bearerToken.value ? { Authorization: `Bearer ${bearerToken.value}` } : {},
     })
@@ -52,8 +43,6 @@ async function onSubmit() {
       description: `Shortened URL: ${response.shortLink}`,
     })
     url.value = ''
-    captchaToken.value = null // Reset after successful submission
-    bearerToken.value = ''
   }
   catch (error) {
     console.error('Submission error:', error) // Debugging log
@@ -66,28 +55,33 @@ async function onSubmit() {
 
 <template>
   <main class="flex flex-col items-center justify-center min-h-screen">
-    <div class="flex flex-col items-center space-y-4">
+    <form
+      class="flex flex-col items-center space-y-4"
+      @submit="onSubmit"
+    >
       <input
         v-model="url"
         type="url"
         placeholder="Enter your URL"
         class="w-full max-w-md p-2 border rounded"
+        required
       >
 
       <component
         :is="TurnstileComponent ? 'cf-turnstile' : 'div'"
         v-if="TurnstileComponent"
         :site-key="publicSiteKey"
-        @success="onCaptchaSuccess"
-        @error="onCaptchaError"
       />
       <div v-else class="text-red-500">
         CAPTCHA component failed to load.
       </div>
 
-      <button class="w-full max-w-md p-2 bg-blue-500 text-white rounded" @click="onSubmit">
+      <button
+        type="submit"
+        class="w-full max-w-md p-2 bg-blue-500 text-white rounded"
+      >
         Shorten Link
       </button>
-    </div>
+    </form>
   </main>
 </template>
